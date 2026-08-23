@@ -1,3 +1,13 @@
+---
+title: WACRM
+emoji: 💬
+colorFrom: green
+colorTo: gray
+sdk: docker
+app_port: 8000
+pinned: false
+---
+
 # WACRM - WA-CRM untuk UMKM
 
 Inbox terpusat + Follow-up otomatis + Broadcast anti-banned.

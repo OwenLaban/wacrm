@@ -59,9 +59,10 @@ async def lifespan(app: FastAPI):
         finally:
             db.close()
 
-    scheduler.add_job(job, "interval", minutes=1, id="followup_job")
+    interval = int(os.getenv("FOLLOWUP_INTERVAL_MINUTES", "1"))
+    scheduler.add_job(job, "interval", minutes=interval, id="followup_job")
     scheduler.start()
-    print("[SCHEDULER] Follow-up job started (every 1 min)")
+    print(f"[SCHEDULER] Follow-up job started (every {interval} min)")
 
     yield
     scheduler.shutdown()
