@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
@@ -59,13 +59,19 @@ async def lifespan(app: FastAPI):
         finally:
             db.close()
 
-    interval = int(os.getenv("FOLLOWUP_INTERVAL_MINUTES", "1"))
-    scheduler.add_job(job, "interval", minutes=interval, id="followup_job")
-    scheduler.start()
-    print(f"[SCHEDULER] Follow-up job started (every {interval} min)")
+    if os.getenv("VERCEL"):
+        # Di Vercel (serverless) tidak ada proses persisten -> follow-up dijalankan
+        # lewat endpoint /api/cron/followup yang diping cron eksternal
+        print("[SCHEDULER] Serverless mode: APScheduler off, pakai /api/cron/followup")
+    else:
+        interval = int(os.getenv("FOLLOWUP_INTERVAL_MINUTES", "1"))
+        scheduler.add_job(job, "interval", minutes=interval, id="followup_job")
+        scheduler.start()
+        print(f"[SCHEDULER] Follow-up job started (every {interval} min)")
 
     yield
-    scheduler.shutdown()
+    if scheduler.running:
+        scheduler.shutdown()
 
 app = FastAPI(
     title="WACRM API",
@@ -91,6 +97,24 @@ app.include_router(stats.router)
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+@app.get("/api/cron/followup")
+async def cron_followup(request: Request):
+    """Dipanggil cron eksternal (mis. cron-job.org) di mode serverless untuk
+    menjalankan follow-up otomatis. Proteksi via CRON_SECRET."""
+    secret = os.getenv("CRON_SECRET")
+    if secret:
+        provided = request.query_params.get("secret") or request.headers.get("x-cron-secret")
+        if provided != secret:
+            raise HTTPException(status_code=401, detail="Invalid cron secret")
+    from app.routers.followup import run_followup_job
+    db = SessionLocal()
+    try:
+        sent = await run_followup_job(db)
+        return {"ok": True, "sent": sent}
+    finally:
+        db.close()
 
 # Serve frontend & landing (hanya jika foldernya ada)
 # Lokal: folder static ada di repo root; di Docker: sejajar dengan app/
