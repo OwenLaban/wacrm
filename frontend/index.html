@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WACRM - Dashboard UMKM</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#22c55e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="WACRM">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" type="image/png" href="icons/favicon.png">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={darkMode:'class'}</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  .scrollbar-thin::-webkit-scrollbar{width:6px;height:6px}
+  .scrollbar-thin::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:999px}
+  html.dark .scrollbar-thin::-webkit-scrollbar-thumb{background:#334155}
+  /* Dark mode overrides */
+  html.dark body{background:#020617 !important; color:#e2e8f0 !important}
+  html.dark .bg-white{background:#1e293b !important; border-color:#334155 !important; color:#e2e8f0 !important}
+  html.dark .bg-slate-50{background:#0f172a !important; border-color:#1e293b !important}
+  html.dark .bg-slate-100{background:#1e293b !important; border-color:#334155 !important}
+  html.dark .bg-amber-50{background:#1c1917 !important; border-color:#44403c !important}
+  html.dark .bg-green-50{background:#052e16 !important; border-color:#14532d !important}
+  html.dark .bg-blue-50{background:#0c1a2e !important; border-color:#1e3a5f !important}
+  html.dark .bg-red-50{background:#1f0a0a !important; border-color:#7f1d1d !important}
+  html.dark .bg-emerald-50{background:#022c22 !important; border-color:#064e3b !important}
+  html.dark .text-slate-800, html.dark .text-slate-900{color:#e2e8f0 !important}
+  html.dark .text-slate-500, html.dark .text-slate-400, html.dark .text-slate-600{color:#94a3b8 !important}
+  html.dark .border, html.dark .border-slate-100, html.dark .border-slate-200, html.dark .border-b, html.dark .border-r, html.dark .border-t{border-color:#334155 !important}
+  html.dark input, html.dark select, html.dark textarea{background:#0f172a !important; border-color:#334155 !important; color:#e2e8f0 !important}
+  html.dark input::placeholder, html.dark textarea::placeholder{color:#64748b !important}
+  html.dark .kanban-card{background:#1e293b !important; border-color:#334155 !important; color:#e2e8f0 !important}
+  html.dark .kanban-col{border-color:#334155 !important}
+  html.dark .bg-slate-900{background:#020617 !important}
+  html.dark table thead{background:#0f172a !important}
+  html.dark table tr:hover{background:#1e293b !important}
+  html.dark .bg-black\/50{background:rgba(0,0,0,0.7) !important}
+  *{transition: background-color 0.2s, border-color 0.2s, color 0.2s}
+</style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+<!-- Mobile Top Bar -->
+<header class="md:hidden flex items-center justify-between bg-slate-900 text-white px-4 py-3 sticky top-0 z-30">
+  <button onclick="toggleMobileMenu()" class="w-9 h-9 flex items-center justify-center rounded-xl bg-white/10"><i class="fa-solid fa-bars"></i></button>
+  <span class="font-bold"><i class="fa-brands fa-whatsapp text-green-400"></i> WACRM</span>
+  <button onclick="toggleTheme()" class="w-9 h-9 flex items-center justify-center rounded-xl bg-white/10"><i id="mobileThemeIcon" class="fa-solid fa-moon text-sm"></i></button>
+</header>
+<!-- Overlay for mobile drawer -->
+<div id="mobileOverlay" onclick="toggleMobileMenu()" class="hidden fixed inset-0 bg-black/50 z-20 md:hidden"></div>
+<div class="flex h-[calc(100vh-56px)] md:h-screen overflow-hidden">
+  <!-- Sidebar -->
+  <aside id="sidebar" class="w-64 bg-slate-900 text-slate-100 flex flex-col fixed md:static inset-y-0 left-0 z-30 transform -translate-x-full md:translate-x-0 transition-transform duration-300">
+    <div class="p-6 border-b border-slate-700">
+      <h1 class="text-xl font-bold"><i class="fa-brands fa-whatsapp text-green-400"></i> WACRM</h1>
+      <p class="text-xs text-slate-400 mt-1">WA-CRM untuk UMKM</p>
+    </div>
+    <nav class="flex-1 p-4 space-y-1">
+      <a href="#" onclick="showTab('inbox')" id="nav-inbox" class="flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-800 text-white"><i class="fa-solid fa-inbox"></i> Inbox</a>
+      <a href="#" onclick="showTab('kanban')" id="nav-kanban" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800"><i class="fa-solid fa-table-columns"></i> Kanban Board</a>
+      <a href="#" onclick="showTab('contacts')" id="nav-contacts" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800"><i class="fa-solid fa-users"></i> Kontak</a>
+      <a href="#" onclick="showTab('broadcast')" id="nav-broadcast" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800"><i class="fa-solid fa-bullhorn"></i> Broadcast</a>
+      <a href="#" onclick="showTab('templates')" id="nav-templates" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-800"><i class="fa-solid fa-robot"></i> Follow-Up</a>
+    </nav>
+    <div class="p-4 border-t border-slate-700 space-y-3">
+      <button id="sidebarInstallBtn" onclick="installPWA()" class="hidden w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-green-600 hover:bg-green-700 text-white text-sm font-semibold">
+        <i class="fa-solid fa-download"></i> Install App
+      </button>
+      <!-- Theme Toggle -->
+      <button onclick="toggleTheme()" class="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 transition text-sm">
+        <span class="flex items-center gap-2"><i id="themeIcon" class="fa-solid fa-moon"></i> <span id="themeLabel">Gelap</span></span>
+        <span class="w-10 h-6 bg-slate-600 rounded-full relative flex items-center p-1">
+          <span id="themeDot" class="w-4 h-4 bg-white rounded-full shadow transition translate-x-0"></span>
+        </span>
+      </button>
+      <div class="bg-slate-800 rounded-lg p-3">
+        <p class="text-xs text-slate-400">Mode</p>
+        <p id="gatewayMode" class="text-sm font-mono">mock</p>
+        <p class="text-xs text-slate-500 mt-1">Ganti di .env WA_GATEWAY_PROVIDER</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="flex-1 flex flex-col overflow-hidden pb-14 md:pb-0">
+    <!-- Top Stats - horizontal scroll on mobile -->
+    <div class="bg-white border-b p-3 md:p-4">
+      <div class="flex md:grid md:grid-cols-5 gap-3 overflow-x-auto snap-x snap-mandatory pb-1 md:pb-0 scrollbar-thin">
+        <div class="min-w-[140px] md:min-w-0 snap-start bg-slate-50 rounded-xl p-3 border shrink-0 md:shrink">
+          <p class="text-xs text-slate-500">Total Kontak</p>
+          <p id="stat-total" class="text-2xl font-bold">-</p>
+        </div>
+        <div class="bg-amber-50 rounded-xl p-3 border border-amber-200 min-w-[140px] md:min-w-0 snap-start shrink-0 md:shrink">
+          <p class="text-xs text-amber-700">Belum Bayar</p>
+          <p id="stat-belum" class="text-2xl font-bold text-amber-600">-</p>
+          <p id="stat-omzet" class="text-xs text-amber-600"></p>
+        </div>
+        <div class="bg-green-50 rounded-xl p-3 border border-green-200 min-w-[140px] md:min-w-0 snap-start shrink-0 md:shrink">
+          <p class="text-xs text-green-700">Sudah Bayar</p>
+          <p id="stat-sudah" class="text-2xl font-bold text-green-600">-</p>
+        </div>
+        <div class="bg-red-50 rounded-xl p-3 border border-red-200 min-w-[140px] md:min-w-0 snap-start shrink-0 md:shrink">
+          <p class="text-xs text-red-700">Komplain</p>
+          <p id="stat-komplain" class="text-2xl font-bold text-red-600">-</p>
+        </div>
+        <div class="bg-blue-50 rounded-xl p-3 border border-blue-200 min-w-[140px] md:min-w-0 snap-start shrink-0 md:shrink">
+          <p class="text-xs text-blue-700">Pesan Hari Ini</p>
+          <p id="stat-pesan" class="text-2xl font-bold text-blue-600">-</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab: Inbox -->
+    <div id="tab-inbox" class="flex-1 flex overflow-hidden relative">
+      <!-- List -->
+      <div id="inboxListPanel" class="w-full md:w-[380px] bg-white border-r flex flex-col">
+        <div class="p-3 border-b flex gap-2">
+          <input id="searchInbox" placeholder="Cari nama / no HP..." class="flex-1 px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-green-500">
+          <select id="filterStatus" class="px-2 py-2 rounded-lg border text-sm bg-white">
+            <option value="">Semua</option>
+            <option value="baru">Baru</option>
+            <option value="belum_bayar">Belum Bayar</option>
+            <option value="sudah_bayar">Sudah Bayar</option>
+            <option value="dikirim">Dikirim</option>
+            <option value="komplain">Komplain</option>
+          </select>
+        </div>
+        <div class="p-2 flex gap-1 text-xs">
+          <button onclick="seedDemo()" class="px-2 py-1 bg-slate-100 rounded hover:bg-slate-200"><i class="fa-solid fa-database"></i> Seed Demo</button>
+          <button onclick="loadInbox()" class="px-2 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200"><i class="fa-solid fa-rotate"></i> Refresh</button>
+        </div>
+        <div id="inboxList" class="flex-1 overflow-y-auto scrollbar-thin p-2 space-y-1"></div>
+      </div>
+      <!-- Chat -->
+      <div id="chatPanel" class="hidden md:flex flex-1 flex-col bg-slate-100 absolute md:static inset-0 z-10 md:z-auto bg-slate-100">
+        <div id="chatHeader" class="bg-white border-b p-3 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <button onclick="closeMobileChat()" class="md:hidden w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center"><i class="fa-solid fa-arrow-left text-sm"></i></button>
+            <p class="text-sm text-slate-400" id="chatHeaderText">Pilih kontak di kiri untuk mulai chat</p>
+          </div>
+          <div id="chatHeaderExtra"></div>
+        </div>
+        <div id="chatMessages" class="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-thin"></div>
+        <div id="chatInputArea" class="bg-white border-t p-3 hidden">
+          <div class="flex gap-2">
+            <input id="chatInput" placeholder="Ketik pesan..." class="flex-1 px-3 py-2 rounded-full border focus:outline-none focus:ring-2 focus:ring-green-500">
+            <button onclick="sendChat()" class="bg-green-500 hover:bg-green-600 text-white px-5 py-2 rounded-full"><i class="fa-solid fa-paper-plane"></i></button>
+          </div>
+          <div class="flex gap-2 mt-2 text-xs">
+            <button onclick="quickReply('Halo {nama}, pesanan kakak sudah kami proses ya!')" class="px-2 py-1 bg-slate-100 rounded">Template: Proses</button>
+            <button onclick="quickReply('Halo {nama}, mohon maaf ada kendala, bisa kirim foto barangnya?')" class="px-2 py-1 bg-slate-100 rounded">Template: Komplain</button>
+            <button onclick="scheduleFollowUp()" class="px-2 py-1 bg-amber-100 text-amber-700 rounded"><i class="fa-solid fa-clock"></i> Jadwal Follow-Up 2 jam</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab: Contacts -->
+    <div id="tab-contacts" class="hidden flex-1 overflow-y-auto p-4 md:p-6 bg-slate-50">
+      <div class="max-w-4xl mx-auto">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-lg font-bold">Kelola Kontak</h2>
+          <button onclick="openAddContact()" class="bg-green-500 text-white px-4 py-2 rounded-lg text-sm"><i class="fa-solid fa-plus"></i> Tambah</button>
+        </div>
+        <!-- Desktop Table -->
+        <div class="hidden md:block bg-white rounded-xl border overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm min-w-[600px]">
+              <thead class="bg-slate-50 text-slate-500">
+                <tr><th class="p-3 text-left">Nama</th><th class="p-3 text-left">HP</th><th class="p-3 text-left">Status</th><th class="p-3 text-left">Follow-Up</th><th class="p-3">Aksi</th></tr>
+              </thead>
+              <tbody id="contactsTable"></tbody>
+            </table>
+          </div>
+        </div>
+        <!-- Mobile Cards -->
+        <div id="contactsCards" class="md:hidden space-y-2"></div>
+      </div>
+    </div>
+
+    <!-- Tab: Broadcast -->
+    <div id="tab-broadcast" class="hidden flex-1 overflow-y-auto p-6 bg-slate-50">
+      <div class="max-w-3xl mx-auto space-y-6">
+        <h2 class="text-lg font-bold">Broadcast Promo</h2>
+        <div class="bg-white rounded-xl border p-5 space-y-3">
+          <input id="bcTitle" placeholder="Judul: Promo 11.11 Diskon 20%" class="w-full px-3 py-2 border rounded-lg">
+          <textarea id="bcMessage" rows="4" placeholder="Halo {nama}! Ada promo spesial hari ini..." class="w-full px-3 py-2 border rounded-lg"></textarea>
+          <div class="flex gap-2">
+            <select id="bcTargetStatus" class="px-3 py-2 border rounded-lg bg-white">
+              <option value="">Semua Kontak</option>
+              <option value="belum_bayar">Hanya Belum Bayar</option>
+              <option value="baru">Hanya Baru</option>
+              <option value="sudah_bayar">Hanya Sudah Bayar</option>
+            </select>
+            <button onclick="sendBroadcast()" class="flex-1 bg-green-500 text-white py-2 rounded-lg hover:bg-green-600"><i class="fa-solid fa-paper-plane"></i> Kirim Broadcast</button>
+          </div>
+          <p class="text-xs text-slate-500">* Jeda otomatis 2-5 detik per pesan biar anti-banned. Status bisa dipantau di bawah.</p>
+        </div>
+        <div id="broadcastList" class="space-y-2"></div>
+      </div>
+    </div>
+
+    <!-- Tab: Kanban Board -->
+    <div id="tab-kanban" class="hidden flex-1 flex-col overflow-hidden bg-slate-100">
+      <div class="bg-white border-b p-3 flex justify-between items-center">
+        <h2 class="font-bold"><i class="fa-solid fa-table-columns text-slate-400"></i> Pipeline Penjualan - Drag & Drop</h2>
+        <div class="flex gap-2 text-xs">
+          <button onclick="loadKanban()" class="px-3 py-1.5 bg-slate-100 rounded-lg hover:bg-slate-200"><i class="fa-solid fa-rotate"></i> Refresh</button>
+          <button onclick="openAddContact()" class="px-3 py-1.5 bg-green-500 text-white rounded-lg"><i class="fa-solid fa-plus"></i> Tambah Kontak</button>
+        </div>
+      </div>
+      <div class="flex-1 overflow-x-auto overflow-y-hidden p-3 md:p-4 snap-x snap-mandatory">
+        <div id="kanbanBoard" class="flex gap-3 md:gap-4 h-full min-w-max">
+          <!-- columns injected by JS -->
+        </div>
+      </div>
+      <div class="bg-amber-50 border-t px-4 py-2 text-xs text-amber-700 flex items-center gap-2">
+        <i class="fa-solid fa-lightbulb"></i> Tips: Drag kartu ke kolom lain untuk ubah status otomatis (Belum Bayar → Sudah Bayar → Dikirim)
+      </div>
+    </div>
+
+    <!-- Tab: Templates -->
+    <div id="tab-templates" class="hidden flex-1 overflow-y-auto p-6 bg-slate-50">
+      <div class="max-w-3xl mx-auto space-y-4">
+        <div class="flex justify-between items-center">
+          <h2 class="text-lg font-bold">Template Follow-Up Otomatis</h2>
+          <button onclick="openAddTemplate()" class="bg-slate-900 text-white px-4 py-2 rounded-lg text-sm"><i class="fa-solid fa-plus"></i> Tambah Template</button>
+        </div>
+        <div id="templatesList" class="space-y-3"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Bottom Nav Mobile -->
+<nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t dark:border-slate-800 flex justify-around items-center py-1 z-30 safe-area-pb">
+  <button onclick="showTab('inbox')" id="mnav-inbox" class="mobile-nav-btn flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl text-green-500 bg-green-50 dark:bg-green-900/30">
+    <i class="fa-solid fa-inbox text-sm"></i><span class="text-[10px] font-medium">Inbox</span>
+  </button>
+  <button onclick="showTab('kanban')" id="mnav-kanban" class="mobile-nav-btn flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl text-slate-400">
+    <i class="fa-solid fa-table-columns text-sm"></i><span class="text-[10px]">Kanban</span>
+  </button>
+  <button onclick="showTab('contacts')" id="mnav-contacts" class="mobile-nav-btn flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl text-slate-400">
+    <i class="fa-solid fa-users text-sm"></i><span class="text-[10px]">Kontak</span>
+  </button>
+  <button onclick="showTab('broadcast')" id="mnav-broadcast" class="mobile-nav-btn flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl text-slate-400">
+    <i class="fa-solid fa-bullhorn text-sm"></i><span class="text-[10px]">Broadcast</span>
+  </button>
+  <button onclick="showTab('templates')" id="mnav-templates" class="mobile-nav-btn flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl text-slate-400">
+    <i class="fa-solid fa-robot text-sm"></i><span class="text-[10px]">Follow-Up</span>
+  </button>
+</nav>
+
+<!-- Modal Add Contact -->
+<div id="modalContact" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-xl p-6 w-full max-w-md space-y-3">
+    <h3 class="font-bold">Tambah Kontak</h3>
+    <input id="addPhone" placeholder="628123456789" class="w-full px-3 py-2 border rounded-lg">
+    <input id="addName" placeholder="Nama" class="w-full px-3 py-2 border rounded-lg">
+    <select id="addStatus" class="w-full px-3 py-2 border rounded-lg bg-white">
+      <option value="baru">Baru</option><option value="belum_bayar">Belum Bayar</option><option value="sudah_bayar">Sudah Bayar</option><option value="dikirim">Dikirim</option><option value="komplain">Komplain</option>
+    </select>
+    <div class="flex gap-2"><button onclick="closeAddContact()" class="flex-1 py-2 border rounded-lg">Batal</button><button onclick="submitAddContact()" class="flex-1 py-2 bg-green-500 text-white rounded-lg">Simpan</button></div>
+  </div>
+</div>
+
+<!-- Modal Template -->
+<div id="modalTemplate" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-xl p-6 w-full max-w-md space-y-3">
+    <h3 class="font-bold">Template Follow-Up</h3>
+    <input id="tplName" placeholder="Nama: Tagihan 2 Jam" class="w-full px-3 py-2 border rounded-lg">
+    <select id="tplStatus" class="w-full px-3 py-2 border rounded-lg bg-white">
+      <option value="belum_bayar">Trigger: Belum Bayar</option><option value="baru">Trigger: Baru</option><option value="komplain">Trigger: Komplain</option>
+    </select>
+    <input id="tplDelay" type="number" placeholder="Delay menit (120 = 2 jam)" value="120" class="w-full px-3 py-2 border rounded-lg">
+    <textarea id="tplMessage" rows="3" placeholder="Halo {nama} ..." class="w-full px-3 py-2 border rounded-lg"></textarea>
+    <p class="text-xs text-slate-500">Gunakan {nama} dan {phone} untuk personalisasi</p>
+    <div class="flex gap-2"><button onclick="closeAddTemplate()" class="flex-1 py-2 border rounded-lg">Batal</button><button onclick="submitAddTemplate()" class="flex-1 py-2 bg-slate-900 text-white rounded-lg">Simpan</button></div>
+  </div>
+</div>
+
+<!-- Floating theme toggle for mobile -->
+<button onclick="toggleTheme()" class="md:hidden fixed bottom-20 right-4 w-12 h-12 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-full shadow-xl flex items-center justify-center z-40 border dark:border-slate-200">
+  <i id="floatingIcon" class="fa-solid fa-moon"></i>
+</button>
+
+<script>
+// ===== THEME TOGGLE =====
+function applyTheme(theme){
+  const html = document.documentElement;
+  const icon = document.getElementById('themeIcon');
+  const label = document.getElementById('themeLabel');
+  const dot = document.getElementById('themeDot');
+  const floatingIcon = document.getElementById('floatingIcon');
+  const mobileIcon = document.getElementById('mobileThemeIcon');
+  if(theme==='dark'){
+    html.classList.add('dark');
+    if(icon) icon.className='fa-solid fa-sun text-amber-400';
+    if(label) label.textContent='Terang';
+    if(dot) { dot.style.transform='translateX(16px)'; dot.className='w-4 h-4 bg-amber-400 rounded-full shadow transition'; }
+    if(floatingIcon) floatingIcon.className='fa-solid fa-sun';
+    if(mobileIcon) mobileIcon.className='fa-solid fa-sun text-amber-300';
+  } else {
+    html.classList.remove('dark');
+    if(icon) icon.className='fa-solid fa-moon';
+    if(label) label.textContent='Gelap';
+    if(dot) { dot.style.transform='translateX(0)'; dot.className='w-4 h-4 bg-white rounded-full shadow transition'; }
+    if(floatingIcon) floatingIcon.className='fa-solid fa-moon';
+    if(mobileIcon) mobileIcon.className='fa-solid fa-moon';
+  }
+  localStorage.setItem('wacrm-theme', theme);
+}
+function toggleTheme(){
+  const cur = localStorage.getItem('wacrm-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  const next = cur==='dark' ? 'light' : 'dark';
+  applyTheme(next);
+}
+// init theme before render (prevent flash)
+(function(){ const saved=localStorage.getItem('wacrm-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); applyTheme(saved); })();
+
+const API = 'http://localhost:8000';
+// Fix: file:// juga harus ke localhost, jangan kosong
+// Auto-detect mode dari backend
+fetch('http://localhost:8000/health').then(()=> {
+  document.getElementById('gatewayMode').textContent = 'fonnte (connected)';
+  document.getElementById('gatewayMode').className = 'text-sm font-mono text-green-400';
+}).catch(()=> {
+  document.getElementById('gatewayMode').textContent = 'offline - cek backend';
+  document.getElementById('gatewayMode').className = 'text-sm font-mono text-red-400';
+});
+let selectedContactId = null;
+let inboxData = [];
+
+function showTab(name){
+  // close mobile drawer
+  const sb=document.getElementById('sidebar'); const ov=document.getElementById('mobileOverlay');
+  if(sb && !sb.classList.contains('-translate-x-full') && window.innerWidth<768){ sb.classList.add('-translate-x-full'); ov.classList.add('hidden'); }
+  // close mobile chat when switching tabs
+  const chatPanel=document.getElementById('chatPanel'); if(chatPanel){ chatPanel.classList.add('hidden'); chatPanel.classList.remove('flex'); document.getElementById('inboxListPanel')?.classList.remove('hidden'); }
+  document.querySelectorAll('[id^="tab-"]').forEach(el=>{
+    el.classList.add('hidden');
+    if(el.id==='tab-kanban') el.classList.remove('flex');
+  });
+  const target = document.getElementById('tab-'+name);
+  target.classList.remove('hidden');
+  if(name==='kanban') target.classList.add('flex');
+  document.querySelectorAll('aside nav a').forEach(a=>a.classList.remove('bg-slate-800','text-white'));
+  const navEl=document.getElementById('nav-'+name); if(navEl) navEl.classList.add('bg-slate-800','text-white');
+  // update mobile bottom nav
+  document.querySelectorAll('.mobile-nav-btn').forEach(b=>b.classList.remove('text-green-500','bg-green-50','dark:bg-green-900/30'));
+  const mBtn=document.getElementById('mnav-'+name); if(mBtn) mBtn.classList.add('text-green-500','bg-green-50','dark:bg-green-900/30');
+  if(name==='contacts') loadContacts();
+  if(name==='broadcast') loadBroadcasts();
+  if(name==='templates') loadTemplates();
+  if(name==='kanban') loadKanban();
+}
+
+async function loadStats(){
+  try{
+    const r = await fetch(`${API}/api/stats`);
+    const d = await r.json();
+    document.getElementById('stat-total').textContent = d.total_kontak;
+    document.getElementById('stat-belum').textContent = d.belum_bayar;
+    document.getElementById('stat-sudah').textContent = d.sudah_bayar;
+    document.getElementById('stat-komplain').textContent = d.komplain;
+    document.getElementById('stat-pesan').textContent = d.pesan_hari_ini;
+    document.getElementById('stat-omzet').textContent = d.omzet_terancam>0 ? `Rp ${d.omzet_terancam.toLocaleString('id-ID')} terancam` : '';
+  }catch(e){console.error(e)}
+}
+
+async function loadInbox(){
+  const q = document.getElementById('searchInbox').value;
+  const status = document.getElementById('filterStatus').value;
+  let url = `${API}/api/messages/inbox`;
+  // fallback to contacts filter via inbox? we filter client side
+  const r = await fetch(url);
+  let data = await r.json();
+  // client filter
+  if(q) data = data.filter(c=> c.phone.includes(q) || (c.name||'').toLowerCase().includes(q.toLowerCase()));
+  if(status) data = data.filter(c=> c.status===status);
+  inboxData = data;
+  const list = document.getElementById('inboxList');
+  list.innerHTML = data.map(c=>`
+    <div onclick="openChat(${c.id})" class="p-3 rounded-xl cursor-pointer hover:bg-slate-50 border ${selectedContactId===c.id?'bg-green-50 border-green-200': 'bg-white border-slate-100'}">
+      <div class="flex justify-between items-start">
+        <div class="flex-1 min-w-0">
+          <p class="font-semibold text-sm truncate">${c.name||c.phone} <span class="text-xs font-normal text-slate-400">${c.phone}</span></p>
+          <p class="text-xs text-slate-500 truncate">${c.last_direction==='out'?'↗ ': '↙ '}${c.last_message||'-'}</p>
+        </div>
+        <span class="ml-2 text-[10px] px-2 py-1 rounded-full font-medium ${statusColor(c.status)}">${c.status}</span>
+      </div>
+      ${c.follow_up_at? `<p class="text-[10px] text-amber-600 mt-1"><i class="fa-solid fa-clock"></i> Follow-up ${new Date(c.follow_up_at).toLocaleString('id-ID')}</p>`:''}
+    </div>
+  `).join('') || '<p class="text-sm text-slate-400 p-4 text-center">Belum ada kontak. Klik Seed Demo.</p>';
+  loadStats();
+}
+
+function statusColor(s){
+  const map={baru:'bg-slate-100 text-slate-600', belum_bayar:'bg-amber-100 text-amber-700', sudah_bayar:'bg-green-100 text-green-700', dikirim:'bg-blue-100 text-blue-700', selesai:'bg-green-100 text-green-700', komplain:'bg-red-100 text-red-700'};
+  return map[s]||'bg-slate-100';
+}
+
+function toggleMobileMenu(){
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('mobileOverlay');
+  const isOpen = !sb.classList.contains('-translate-x-full');
+  if(isOpen){ sb.classList.add('-translate-x-full'); ov.classList.add('hidden'); }
+  else { sb.classList.remove('-translate-x-full'); ov.classList.remove('hidden'); }
+}
+function closeMobileChat(){
+  document.getElementById('chatPanel').classList.add('hidden');
+  document.getElementById('chatPanel').classList.remove('flex');
+  document.getElementById('inboxListPanel').classList.remove('hidden');
+}
+async function openChat(id){
+  selectedContactId = id;
+  const c = inboxData.find(x=>x.id===id);
+  if(!c) return;
+  // mobile: show chat, hide list
+  if(window.innerWidth < 768){
+    document.getElementById('inboxListPanel').classList.add('hidden');
+    const panel = document.getElementById('chatPanel');
+    panel.classList.remove('hidden');
+    panel.classList.add('flex');
+  } else {
+    document.getElementById('chatPanel').classList.remove('hidden');
+    document.getElementById('chatPanel').classList.add('flex');
+  }
+  document.getElementById('chatHeader').innerHTML = `
+    <div class="flex items-center gap-2">
+      <button onclick="closeMobileChat()" class="md:hidden w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center"><i class="fa-solid fa-arrow-left text-sm"></i></button>
+      <div>
+        <p class="font-semibold text-sm">${c.name} <span class="text-slate-400 font-normal text-xs hidden md:inline">${c.phone}</span></p>
+        <p class="text-xs font-mono md:hidden text-slate-500">${c.phone}</p>
+        <select onchange="changeStatus(${c.id}, this.value)" class="text-xs border rounded px-2 py-1 mt-1 bg-white dark:bg-slate-800">
+          ${['baru','belum_bayar','sudah_bayar','dikirim','selesai','komplain'].map(s=>`<option value="${s}" ${s===c.status?'selected':''}>${s}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <button onclick="triggerFollowUp(${c.id})" class="text-xs bg-amber-100 text-amber-700 px-3 py-2 rounded-lg whitespace-nowrap"><i class="fa-solid fa-bolt"></i> <span class="hidden md:inline">Kirim Follow-Up</span><span class="md:hidden">Follow-Up</span></button>
+  `;
+  document.getElementById('chatInputArea').classList.remove('hidden');
+  loadMessages(id);
+  loadInbox(); // refresh highlight
+}
+
+async function loadMessages(id){
+  const r = await fetch(`${API}/api/contacts/${id}/messages`);
+  const msgs = await r.json();
+  const box = document.getElementById('chatMessages');
+  box.innerHTML = msgs.map(m=>`
+    <div class="flex ${m.direction==='out'?'justify-end':'justify-start'}">
+      <div class="max-w-[75%] rounded-2xl px-4 py-2 text-sm ${m.direction==='out'? (m.is_auto?'bg-amber-100 border border-amber-200':'bg-green-500 text-white') : 'bg-white border'}">
+        <p>${m.content}</p>
+        <p class="text-[10px] mt-1 ${m.direction==='out'&&!m.is_auto?'text-green-100':'text-slate-400'}">${new Date(m.created_at).toLocaleString('id-ID')} ${m.is_auto?' • AUTO':''}</p>
+      </div>
+    </div>
+  `).join('');
+  box.scrollTop = box.scrollHeight;
+}
+
+async function sendChat(){
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if(!text || !selectedContactId) return;
+  input.value='';
+  await fetch(`${API}/api/messages/send`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contact_id:selectedContactId, content:text})});
+  loadMessages(selectedContactId);
+  loadInbox();
+}
+document.getElementById('chatInput')?.addEventListener('keydown',e=>{ if(e.key==='Enter') sendChat(); });
+document.getElementById('searchInbox').addEventListener('input', loadInbox);
+document.getElementById('filterStatus').addEventListener('change', loadInbox);
+
+function quickReply(tpl){
+  const c = inboxData.find(x=>x.id===selectedContactId);
+  const text = tpl.replace('{nama}', c?.name?.split(' ')[0] || 'Kak');
+  document.getElementById('chatInput').value = text;
+}
+
+async function changeStatus(id, status){
+  await fetch(`${API}/api/contacts/${id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status})});
+  loadInbox();
+}
+
+async function scheduleFollowUp(){
+  if(!selectedContactId) return;
+  await fetch(`${API}/api/followup/schedule/${selectedContactId}?delay_minutes=5`,{method:'POST'});
+  alert('Follow-up dijadwalkan 5 menit lagi (untuk demo). Cek scheduler tiap 1 menit.');
+  loadInbox();
+}
+async function triggerFollowUp(id){
+  const r = await fetch(`${API}/api/followup/trigger/${id}`,{method:'POST'});
+  const d = await r.json();
+  if(!r.ok) alert(d.detail || 'Gagal');
+  else { loadMessages(id); loadInbox(); }
+}
+
+async function seedDemo(){
+  await fetch(`${API}/api/seed-demo`);
+  loadInbox();
+  loadStats();
+}
+
+// Contacts Tab
+async function loadContacts(){
+  const r = await fetch(`${API}/api/contacts`);
+  const data = await r.json();
+  document.getElementById('contactsTable').innerHTML = data.map(c=>`
+    <tr class="border-t hover:bg-slate-50">
+      <td class="p-3">${c.name||'-'}</td><td class="p-3 font-mono text-xs">${c.phone}</td>
+      <td class="p-3"><span class="text-xs px-2 py-1 rounded-full ${statusColor(c.status)}">${c.status}</span></td>
+      <td class="p-3 text-xs">${c.follow_up_at? new Date(c.follow_up_at).toLocaleString('id-ID'):'-'}</td>
+      <td class="p-3 text-center"><button onclick="openChat(${c.id}); showTab('inbox')" class="text-green-600 text-xs"><i class="fa-solid fa-comment"></i> Chat</button> <button onclick="deleteContact(${c.id})" class="text-red-500 text-xs ml-2"><i class="fa-solid fa-trash"></i></button></td>
+    </tr>
+  `).join('');
+  // Mobile cards
+  const cardsEl = document.getElementById('contactsCards');
+  if(cardsEl) cardsEl.innerHTML = data.map(c=>`
+    <div class="bg-white dark:bg-slate-800 rounded-xl border p-3 flex justify-between items-center">
+      <div class="flex-1 min-w-0">
+        <p class="font-semibold text-sm truncate">${c.name||'-'}</p>
+        <p class="font-mono text-xs text-slate-500">${c.phone}</p>
+        <span class="inline-block mt-1 text-[10px] px-2 py-0.5 rounded-full ${statusColor(c.status)}">${c.status}</span>
+      </div>
+      <div class="flex gap-1 ml-2">
+        <button onclick="openChat(${c.id}); showTab('inbox')" class="w-8 h-8 bg-green-500 text-white rounded-full text-xs"><i class="fa-solid fa-comment"></i></button>
+        <button onclick="deleteContact(${c.id})" class="w-8 h-8 bg-white dark:bg-slate-700 border rounded-full text-xs text-red-500"><i class="fa-solid fa-trash"></i></button>
+      </div>
+    </div>
+  `).join('') || '<p class="text-center text-sm text-slate-400 py-8">Belum ada kontak</p>';
+}
+function openAddContact(){document.getElementById('modalContact').classList.remove('hidden')}
+function closeAddContact(){document.getElementById('modalContact').classList.add('hidden')}
+async function submitAddContact(){
+  const phone=document.getElementById('addPhone').value, name=document.getElementById('addName').value, status=document.getElementById('addStatus').value;
+  const r=await fetch(`${API}/api/contacts`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone,name,status})});
+  const d=await r.json();
+  if(!r.ok) alert(d.detail); else {closeAddContact(); loadContacts(); loadInbox();}
+}
+async function deleteContact(id){ if(!confirm('Hapus kontak?')) return; await fetch(`${API}/api/contacts/${id}`,{method:'DELETE'}); loadContacts(); loadInbox(); }
+
+// Broadcast
+async function sendBroadcast(){
+  const title=document.getElementById('bcTitle').value, message=document.getElementById('bcMessage').value, target_status=document.getElementById('bcTargetStatus').value;
+  if(!title||!message) return alert('Judul & pesan wajib');
+  let r=await fetch(`${API}/api/broadcast`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title,message})});
+  const b=await r.json();
+  r=await fetch(`${API}/api/broadcast/${b.id}/send`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title,message,target_status: target_status||null})});
+  const d=await r.json();
+  if(!r.ok) alert(d.detail); else { alert(`Broadcast dikirim ke ${d.total_target} kontak. Cek status di bawah.`); loadBroadcasts();}
+}
+async function loadBroadcasts(){
+  const r=await fetch(`${API}/api/broadcast`);
+  const data=await r.json();
+  document.getElementById('broadcastList').innerHTML = data.map(b=>`
+    <div class="bg-white border rounded-xl p-4">
+      <div class="flex justify-between"><p class="font-semibold">${b.title}</p><span class="text-xs px-2 py-1 rounded-full ${b.status==='done'?'bg-green-100 text-green-700': b.status==='sending'?'bg-amber-100 text-amber-700':'bg-slate-100'}">${b.status}</span></div>
+      <p class="text-sm text-slate-600 mt-1">${b.message.slice(0,100)}</p>
+      <p class="text-xs text-slate-400 mt-2">Target: ${b.total_target} | Terkirim: ${b.sent_count} | Gagal: ${b.failed_count}</p>
+    </div>
+  `).join('') || '<p class="text-sm text-slate-400">Belum ada broadcast</p>';
+}
+
+// Templates
+async function loadTemplates(){
+  const r=await fetch(`${API}/api/followup/templates`);
+  const data=await r.json();
+  document.getElementById('templatesList').innerHTML = data.map(t=>`
+    <div class="bg-white border rounded-xl p-4 flex justify-between items-start">
+      <div class="flex-1">
+        <p class="font-semibold">${t.name} <span class="text-xs font-normal px-2 py-0.5 rounded bg-slate-100">${t.trigger_status} • ${t.delay_minutes} menit</span> ${t.is_active?'<span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">AKTIF</span>':'<span class="text-xs bg-slate-100 px-2 py-0.5 rounded">NONAKTIF</span>'}</p>
+        <p class="text-sm text-slate-600 mt-1 whitespace-pre-wrap">${t.message_template}</p>
+      </div>
+      <button onclick="deleteTemplate(${t.id})" class="text-red-500 ml-3"><i class="fa-solid fa-trash"></i></button>
+    </div>
+  `).join('');
+}
+function openAddTemplate(){document.getElementById('modalTemplate').classList.remove('hidden')}
+function closeAddTemplate(){document.getElementById('modalTemplate').classList.add('hidden')}
+async function submitAddTemplate(){
+  const payload={name:document.getElementById('tplName').value, trigger_status:document.getElementById('tplStatus').value, delay_minutes:parseInt(document.getElementById('tplDelay').value), message_template:document.getElementById('tplMessage').value};
+  const r=await fetch(`${API}/api/followup/templates`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+  if(!r.ok) alert('Gagal'); else {closeAddTemplate(); loadTemplates();}
+}
+async function deleteTemplate(id){ await fetch(`${API}/api/followup/templates/${id}`,{method:'DELETE'}); loadTemplates(); }
+
+// ===== KANBAN BOARD - DRAG & DROP =====
+const KANBAN_COLS = [
+  {id:'baru', label:'Baru', color:'bg-slate-100', dot:'bg-slate-500', icon:'fa-star'},
+  {id:'belum_bayar', label:'Belum Bayar', color:'bg-amber-50', dot:'bg-amber-500', icon:'fa-clock'},
+  {id:'sudah_bayar', label:'Sudah Bayar', color:'bg-green-50', dot:'bg-green-500', icon:'fa-check'},
+  {id:'dikirim', label:'Dikirim', color:'bg-blue-50', dot:'bg-blue-500', icon:'fa-truck'},
+  {id:'selesai', label:'Selesai', color:'bg-emerald-50', dot:'bg-emerald-600', icon:'fa-circle-check'},
+  {id:'komplain', label:'Komplain', color:'bg-red-50', dot:'bg-red-500', icon:'fa-triangle-exclamation'},
+];
+let draggedId = null;
+
+async function loadKanban(){
+  const r = await fetch(`${API}/api/contacts`);
+  const contacts = await r.json();
+  const board = document.getElementById('kanbanBoard');
+  board.innerHTML = KANBAN_COLS.map(col=>{
+    const items = contacts.filter(c=>c.status===col.id);
+    const total = items.length;
+    return `
+    <div class="kanban-col w-\[85vw\] md:w-\[300px\] snap-start shrink-0 ${col.color} rounded-2xl border flex flex-col max-h-full" 
+         ondragover="allowDrop(event)" ondragleave="this.classList.remove('ring-2','ring-green-400')" ondrop="dropCard(event,'${col.id}')">
+      <div class="p-3 border-b bg-white/70 backdrop-blur rounded-t-2xl flex justify-between items-center sticky top-0">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full ${col.dot}"></span>
+          <span class="font-bold text-sm">${col.label}</span>
+          <span class="bg-white border px-2 py-0.5 rounded-full text-xs">${total}</span>
+        </div>
+        <i class="fa-solid ${col.icon} text-slate-400 text-xs"></i>
+      </div>
+      <div class="flex-1 overflow-y-auto p-2 space-y-2 scrollbar-thin" style="min-height:200px">
+        ${items.map(c=>`
+          <div draggable="true" ondragstart="dragStart(event,${c.id})" ondragend="dragEnd(event)"
+               class="kanban-card bg-white rounded-xl border p-3 shadow-sm hover:shadow-md cursor-grab active:cursor-grabbing transition">
+            <div class="flex justify-between items-start">
+              <p class="font-semibold text-sm truncate pr-2">${c.name||'Tanpa Nama'}</p>
+              <span class="text-[10px] text-slate-400 font-mono">${c.phone.slice(-4)}</span>
+            </div>
+            <p class="text-xs text-slate-500 font-mono mt-0.5">${c.phone}</p>
+            ${c.notes?`<p class="text-xs bg-slate-50 border rounded-lg p-2 mt-2 line-clamp-2">${c.notes}</p>`:''}
+            <div class="flex justify-between items-center mt-2">
+              <span class="text-[10px] text-slate-400"><i class="fa-regular fa-clock"></i> ${c.follow_up_at? new Date(c.follow_up_at).toLocaleDateString('id-ID'): new Date(c.created_at).toLocaleDateString('id-ID')}</span>
+              <div class="flex gap-1">
+                <button onclick="event.stopPropagation(); openChat(${c.id}); showTab('inbox')" class="w-6 h-6 bg-slate-900 text-white rounded-full text-[10px] hover:bg-black"><i class="fa-solid fa-comment"></i></button>
+                <button onclick="event.stopPropagation(); deleteContactKanban(${c.id})" class="w-6 h-6 bg-white border rounded-full text-[10px] hover:bg-red-50 text-slate-500"><i class="fa-solid fa-trash"></i></button>
+              </div>
+            </div>
+          </div>
+        `).join('')}
+        ${total===0?`<div class="border-2 border-dashed rounded-xl p-6 text-center text-xs text-slate-400">Drop disini<br>dari kolom lain</div>`:''}
+        <button onclick="quickAddKanban('${col.id}')" class="w-full py-2 border-2 border-dashed rounded-xl text-xs text-slate-400 hover:bg-white hover:border-slate-300"><i class="fa-solid fa-plus"></i> Tambah</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function dragStart(e, id){ draggedId = id; e.target.style.opacity='0.5'; e.dataTransfer.effectAllowed='move'; }
+function dragEnd(e){ e.target.style.opacity='1'; document.querySelectorAll('.kanban-col').forEach(c=>c.classList.remove('ring-2','ring-green-400')); }
+function allowDrop(e){ e.preventDefault(); e.currentTarget.classList.add('ring-2','ring-green-400'); }
+async function dropCard(e, newStatus){
+  e.preventDefault(); e.currentTarget.classList.remove('ring-2','ring-green-400');
+  if(!draggedId) return;
+  const id = draggedId; draggedId=null;
+  // optimistic UI
+  const card = document.querySelector(`[ondragstart*="${id}"]`);
+  if(card) { card.style.opacity='0.5'; }
+  try{
+    const r = await fetch(`${API}/api/contacts/${id}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:newStatus})});
+    if(!r.ok){ const d=await r.json(); throw new Error(d.detail||'Gagal'); }
+    await loadKanban(); await loadInbox(); await loadStats();
+    // toast
+    showToast(`Dipindah ke ${newStatus} ✅`);
+  }catch(err){ alert(err.message); loadKanban(); }
+}
+async function deleteContactKanban(id){ if(!confirm('Hapus kontak?')) return; await fetch(`${API}/api/contacts/${id}`,{method:'DELETE'}); loadKanban(); loadInbox(); loadStats(); }
+function quickAddKanban(status){
+  document.getElementById('addStatus').value = status;
+  openAddContact();
+  // after save, reload kanban too
+  const orig = submitAddContact;
+  window._origSubmit = window._origSubmit || orig;
+}
+function showToast(msg){
+  let t=document.getElementById('toast'); if(!t){ t=document.createElement('div'); t.id='toast'; t.className='fixed bottom-4 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-4 py-2 rounded-full text-sm shadow-xl z-50'; document.body.appendChild(t); }
+  t.textContent=msg; t.style.display='block'; setTimeout(()=>t.style.display='none',2000);
+}
+// override submit to also reload kanban
+const _submitOrig = submitAddContact;
+submitAddContact = async function(){
+  const phone=document.getElementById('addPhone').value, name=document.getElementById('addName').value, status=document.getElementById('addStatus').value;
+  const r=await fetch(`${API}/api/contacts`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({phone,name,status})});
+  const d=await r.json();
+  if(!r.ok) alert(d.detail); else {closeAddContact(); loadContacts(); loadInbox(); loadKanban(); loadStats(); document.getElementById('addPhone').value=''; document.getElementById('addName').value='';}
+}
+
+loadInbox(); loadStats();
+setInterval(loadInbox, 5000);
+</script>
+
+<!-- PWA Install Banner -->
+<div id="pwaInstallBanner" class="hidden fixed bottom-16 md:bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-80 bg-slate-900 dark:bg-slate-800 text-white rounded-2xl p-4 shadow-2xl z-50 border border-slate-700">
+  <div class="flex gap-3">
+    <img src="icons/icon-192.png" class="w-10 h-10 rounded-xl bg-white p-1">
+    <div class="flex-1">
+      <p class="font-bold text-sm">Install WACRM</p>
+      <p class="text-xs text-slate-400">Akses cepat dari Home Screen</p>
+    </div>
+    <button onclick="dismissPWA()" class="text-slate-400 w-8 h-8"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div class="flex gap-2 mt-3">
+    <button onclick="installPWA()" class="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 rounded-full text-sm font-semibold">Install</button>
+    <button onclick="dismissPWA()" class="px-4 py-2 bg-white/10 rounded-full text-sm">Nanti</button>
+  </div>
+</div>
+
+<script>
+// PWA Service Worker + Install Prompt
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', (e)=>{
+  e.preventDefault(); deferredPrompt = e;
+  document.getElementById('sidebarInstallBtn')?.classList.remove('hidden');
+  // show banner after 2s if not dismissed
+  if(!localStorage.getItem('pwa-dismissed')){
+    setTimeout(()=>{ document.getElementById('pwaInstallBanner').classList.remove('hidden'); }, 2000);
+  }
+});
+async function installPWA(){
+  if(!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const choice = await deferredPrompt.userChoice;
+  if(choice.outcome==='accepted') document.getElementById('pwaInstallBanner').classList.add('hidden');
+  deferredPrompt=null;
+}
+function dismissPWA(){ document.getElementById('pwaInstallBanner').classList.add('hidden'); localStorage.setItem('pwa-dismissed','1'); }
+// SW register
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=> navigator.serviceWorker.register('sw.js').then(r=>console.log('SW registered',r.scope)).catch(e=>console.log('SW fail',e)));
+}
+// also show manual install button in sidebar if standalone? 
+window.addEventListener('appinstalled', ()=>{ document.getElementById('pwaInstallBanner').classList.add('hidden'); console.log('PWA installed'); });
+// iOS fallback - no beforeinstallprompt
+const isIOS = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
+const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+if(isIOS && !isStandalone && !localStorage.getItem('pwa-dismissed')){
+  setTimeout(()=>{
+    const b=document.getElementById('pwaInstallBanner');
+    if(b){ b.querySelector('p.font-bold').textContent='Install di iPhone'; b.querySelector('p.text-xs').textContent='Tap Share → Add to Home Screen'; const btn=b.querySelector('button.bg-green-500'); if(btn){ btn.textContent='OK'; btn.setAttribute('onclick','dismissPWA()'); } b.classList.remove('hidden'); }
+  }, 3000);
+}
+</script>
+</body>
+</html>
+
+

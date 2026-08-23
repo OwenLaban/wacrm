@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WACRM - Stop Kehilangan Closing dari WA</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#22c55e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="WACRM">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" type="image/png" href="icons/favicon.png">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={darkMode:'class'}</script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  *{transition: background-color 0.2s, border-color 0.2s, color 0.2s}
+  html.dark body{background:#020617 !important; color:#e2e8f0 !important}
+  html.dark .bg-white{background:#1e293b !important; border-color:#334155 !important; color:#e2e8f0 !important}
+  html.dark .bg-slate-50{background:#0f172a !important; border-color:#1e293b !important}
+  html.dark .bg-slate-900{background:#020617 !important}
+  html.dark .text-slate-800, html.dark .text-slate-900{color:#e2e8f0 !important}
+  html.dark .text-slate-500, html.dark .text-slate-600, html.dark .text-slate-400{color:#94a3b8 !important}
+  html.dark .border{border-color:#334155 !important}
+  html.dark input, html.dark select{background:#0f172a !important; border-color:#334155 !important; color:#e2e8f0 !important}
+  html.dark nav{background:#020617 !important}
+</style>
+</head>
+<body class="bg-white text-slate-800 dark:bg-slate-950">
+<script>
+// init theme early to prevent flash - sync with dashboard
+(function(){
+  const saved = localStorage.getItem('wacrm-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  if(saved==='dark') document.documentElement.classList.add('dark');
+})();
+function toggleLandingTheme(){
+  const isDark = document.documentElement.classList.toggle('dark');
+  localStorage.setItem('wacrm-theme', isDark ? 'dark' : 'light');
+  updateLandingIcon(isDark);
+}
+function updateLandingIcon(isDark){
+  const icon = document.getElementById('landingThemeIcon');
+  const label = document.getElementById('landingThemeLabel');
+  if(!icon) return;
+  if(isDark){ icon.className='fa-solid fa-sun text-amber-400'; if(label) label.textContent='Terang'; }
+  else { icon.className='fa-solid fa-moon'; if(label) label.textContent='Gelap'; }
+}
+function toggleLandingMobileMenu(){
+  const m = document.getElementById('landingMobileMenu');
+  m.classList.toggle('hidden');
+}
+document.addEventListener('DOMContentLoaded', ()=>{ updateLandingIcon(document.documentElement.classList.contains('dark')); });
+</script>
+<!-- Nav -->
+<nav class="max-w-6xl mx-auto px-4 md:px-6 py-3 md:py-4 flex justify-between items-center sticky top-0 bg-white/90 backdrop-blur z-30 dark:bg-slate-950/90 border-b dark:border-slate-800">
+  <div class="flex items-center gap-2">
+    <button onclick="toggleLandingMobileMenu()" class="md:hidden w-9 h-9 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 dark:text-white"><i class="fa-solid fa-bars"></i></button>
+    <span class="text-lg md:text-xl font-bold dark:text-white"><i class="fa-brands fa-whatsapp text-green-500"></i> WACRM</span>
+  </div>
+  <div class="hidden md:flex items-center gap-6 text-sm font-medium dark:text-slate-300">
+    <a href="#fitur" class="hover:text-green-600">Fitur</a>
+    <a href="#harga" class="hover:text-green-600">Harga</a>
+    <a href="#daftar" class="hover:text-green-600">Daftar</a>
+  </div>
+  <div class="flex items-center gap-2">
+    <button onclick="toggleLandingTheme()" class="flex items-center gap-2 px-2.5 md:px-3 py-2 rounded-full border hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-white dark:border-slate-700 text-sm">
+      <i id="landingThemeIcon" class="fa-solid fa-moon"></i> <span id="landingThemeLabel" class="hidden md:inline">Gelap</span>
+    </button>
+    <a href="#harga" class="hidden md:inline-flex text-sm bg-slate-900 text-white px-4 py-2 rounded-full hover:bg-black dark:bg-white dark:text-slate-900">Lihat Harga</a>
+    <a href="#daftar" class="md:hidden text-sm bg-green-500 text-white px-3 py-2 rounded-full">Coba Gratis</a>
+  </div>
+</nav>
+<!-- Mobile Menu Drawer -->
+<div id="landingMobileMenu" class="hidden md:hidden fixed inset-0 z-40">
+  <div class="absolute inset-0 bg-black/50" onclick="toggleLandingMobileMenu()"></div>
+  <div class="absolute left-0 top-0 bottom-0 w-64 bg-white dark:bg-slate-900 p-6 flex flex-col gap-4">
+    <div class="flex justify-between items-center"><span class="font-bold dark:text-white"><i class="fa-brands fa-whatsapp text-green-500"></i> WACRM</span><button onclick="toggleLandingMobileMenu()" class="w-8 h-8 bg-slate-100 dark:bg-slate-800 rounded-full dark:text-white"><i class="fa-solid fa-xmark"></i></button></div>
+    <a href="#fitur" onclick="toggleLandingMobileMenu()" class="py-3 border-b dark:border-slate-800 dark:text-white">Fitur</a>
+    <a href="#harga" onclick="toggleLandingMobileMenu()" class="py-3 border-b dark:border-slate-800 dark:text-white">Harga</a>
+    <a href="#daftar" onclick="toggleLandingMobileMenu()" class="py-3 border-b dark:border-slate-800 dark:text-white">Daftar Gratis</a>
+    <a href="http://localhost:8000/docs" class="py-3 dark:text-white">Lihat Demo</a>
+  </div>
+</div>
+
+<!-- Hero -->
+<section class="max-w-6xl mx-auto px-4 md:px-6 py-6 md:py-12 grid md:grid-cols-2 gap-6 md:gap-10 items-center">
+  <div>
+    <div class="inline-flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 text-xs px-3 py-1 rounded-full dark:bg-green-900/30 dark:border-green-800 dark:text-green-300"><span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Dipakai 47 UMKM di fase beta</div>
+    <h1 class="text-3xl md:text-5xl font-extrabold leading-tight mt-4 dark:text-white">Stop Kehilangan <span class="text-green-500">Closing</span> Gara-Gara Chat WA Kelewat</h1>
+    <p class="text-slate-500 mt-4 text-base md:text-lg dark:text-slate-400">Inbox terpusat + follow-up otomatis + broadcast anti-banned. Khusus untuk olshop & UMKM yang kebanjiran chat 50-100/hari.</p>
+    <div class="flex flex-col md:flex-row gap-3 mt-6">
+      <a href="#daftar" class="bg-green-500 hover:bg-green-600 text-white px-6 py-3.5 rounded-full font-semibold text-center">Coba Gratis 14 Hari <i class="fa-solid fa-arrow-right ml-1"></i></a>
+      <a href="http://localhost:8000/docs" target="_blank" class="border px-6 py-3.5 rounded-full font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 text-center dark:text-white dark:border-slate-700">Lihat Demo</a>
+    </div>
+    <div class="flex items-center gap-4 mt-6 text-sm text-slate-500">
+      <span><i class="fa-solid fa-check text-green-500"></i> Tanpa kartu kredit</span>
+      <span><i class="fa-solid fa-check text-green-500"></i> Setup 2 menit</span>
+      <span><i class="fa-solid fa-check text-green-500"></i> Support WA</span>
+    </div>
+  </div>
+  <div class="bg-slate-900 rounded-3xl p-4 shadow-2xl">
+    <img src="https://via.placeholder.com/600x400/0f172a/22c55e?text=Dashboard+WACRM+Preview" alt="preview" class="rounded-2xl w-full">
+    <div class="grid grid-cols-3 gap-3 mt-4">
+      <div class="bg-white/10 backdrop-blur rounded-xl p-3 text-white"><p class="text-2xl font-bold">Rp 4,5jt</p><p class="text-xs text-white/60">Omzet terselamatkan</p></div>
+      <div class="bg-white/10 backdrop-blur rounded-xl p-3 text-white"><p class="text-2xl font-bold">89%</p><p class="text-xs text-white/60">Follow-up terkirim</p></div>
+      <div class="bg-white/10 backdrop-blur rounded-xl p-3 text-white"><p class="text-2xl font-bold">2 jam</p><p class="text-xs text-white/60">Waktu terhemat/hari</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- Masalah -->
+<section class="bg-slate-50 py-8 md:py-12 dark:bg-slate-900/50">
+  <div class="max-w-6xl mx-auto px-4 md:px-6">
+    <h2 class="text-2xl font-bold text-center">Kenapa UMKM Kehilangan Uang di WA?</h2>
+    <div class="grid md:grid-cols-3 gap-6 mt-8">
+      <div class="bg-white p-6 rounded-2xl border"><div class="w-10 h-10 bg-red-100 text-red-600 rounded-full flex items-center justify-center"><i class="fa-solid fa-clock"></i></div><h3 class="font-bold mt-3">Lupa Follow-Up</h3><p class="text-sm text-slate-500 mt-1">Chat "belum bayar" tenggelam, pembeli kabur ke toko lain</p></div>
+      <div class="bg-white p-6 rounded-2xl border"><div class="w-10 h-10 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center"><i class="fa-solid fa-comments"></i></div><h3 class="font-bold mt-3">Chat Berantakan</h3><p class="text-sm text-slate-500 mt-1">50 chat/hari, gak tau mana udah bayar, mana komplain</p></div>
+      <div class="bg-white p-6 rounded-2xl border"><div class="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center"><i class="fa-solid fa-bullhorn"></i></div><h3 class="font-bold mt-3">Broadcast Kena Banned</h3><p class="text-sm text-slate-500 mt-1">Kirim promo manual kebanyakan, nomor WA ke-blokir</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- Fitur -->
+<section id="fitur" class="max-w-6xl mx-auto px-4 md:px-6 py-8 md:py-12">
+  <h2 class="text-xl md:text-2xl font-bold text-center dark:text-white">Semua Solusi dalam 1 Dashboard</h2>
+  <div class="grid md:grid-cols-2 gap-4 md:gap-6 mt-6 md:mt-8">
+    <div class="border rounded-2xl p-6 flex gap-4"><div class="w-12 h-12 bg-green-100 text-green-600 rounded-xl flex items-center justify-center shrink-0"><i class="fa-solid fa-inbox"></i></div><div><h3 class="font-bold">Inbox Terpusat</h3><p class="text-sm text-slate-500">Semua chat WA 1 tempat, multi-admin, bisa ganti status 1 klik</p></div></div>
+    <div class="border rounded-2xl p-6 flex gap-4"><div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center shrink-0"><i class="fa-solid fa-robot"></i></div><div><h3 class="font-bold">Follow-Up Otomatis</h3><p class="text-sm text-slate-500">Belum bayar 2 jam → tagih otomatis. Hemat 2 jam/hari</p></div></div>
+    <div class="border rounded-2xl p-6 flex gap-4"><div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center shrink-0"><i class="fa-solid fa-paper-plane"></i></div><div><h3 class="font-bold">Broadcast Anti-Banned</h3><p class="text-sm text-slate-500">Jeda random 2-5 detik, personalisasi {nama}, limit aman</p></div></div>
+    <div class="border rounded-2xl p-6 flex gap-4"><div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center shrink-0"><i class="fa-solid fa-chart-simple"></i></div><div><h3 class="font-bold">Rekap Omzet</h3><p class="text-sm text-slate-500">Lihat berapa "belum bayar" yang terancam, 1 klik jadi laporan</p></div></div>
+  </div>
+</section>
+
+<!-- Harga -->
+<section id="harga" class="bg-slate-900 text-white py-8 md:py-12">
+  <div class="max-w-6xl mx-auto px-4 md:px-6">
+    <h2 class="text-3xl font-bold text-center">Harga Jujur untuk UMKM</h2>
+    <p class="text-center text-white/60 mt-2">Lebih murah 70% dari Barantum/Qontak. Fitur fokus closing, bukan ribet.</p>
+    <div class="grid md:grid-cols-3 gap-6 mt-8">
+      <div class="bg-white text-slate-800 rounded-3xl p-6"><h3 class="font-bold">Gratis</h3><p class="text-3xl font-extrabold mt-2">Rp 0<span class="text-sm font-normal text-slate-500">/14 hari</span></p><ul class="text-sm space-y-2 mt-4"><li><i class="fa-solid fa-check text-green-500"></i> 1 nomor WA</li><li><i class="fa-solid fa-check text-green-500"></i> 100 chat/bulan</li><li><i class="fa-solid fa-check text-green-500"></i> 1 admin</li></ul><a href="#daftar" class="block text-center mt-6 border py-3 rounded-full font-semibold">Mulai Gratis</a></div>
+      <div class="bg-green-500 text-white rounded-3xl p-6 border-4 border-green-400 relative"><span class="absolute -top-3 left-1/2 -translate-x-1/2 bg-white text-green-600 text-xs px-3 py-1 rounded-full font-bold">PALING LARIS</span><h3 class="font-bold">Laris</h3><p class="text-3xl font-extrabold mt-2">Rp 79rb<span class="text-sm font-normal text-white/70">/bulan</span></p><ul class="text-sm space-y-2 mt-4"><li><i class="fa-solid fa-check"></i> 1 nomor WA</li><li><i class="fa-solid fa-check"></i> 2.000 chat</li><li><i class="fa-solid fa-check"></i> 3 admin + auto follow-up</li><li><i class="fa-solid fa-check"></i> Broadcast</li></ul><a href="#daftar" class="block text-center mt-6 bg-white text-green-600 py-3 rounded-full font-semibold">Pilih Laris</a></div>
+      <div class="bg-white text-slate-800 rounded-3xl p-6"><h3 class="font-bold">Pro</h3><p class="text-3xl font-extrabold mt-2">Rp 199rb<span class="text-sm font-normal text-slate-500">/bulan</span></p><ul class="text-sm space-y-2 mt-4"><li><i class="fa-solid fa-check text-green-500"></i> 3 nomor WA</li><li><i class="fa-solid fa-check text-green-500"></i> Unlimited chat</li><li><i class="fa-solid fa-check text-green-500"></i> 10 admin + API</li></ul><a href="#daftar" class="block text-center mt-6 border py-3 rounded-full font-semibold">Pilih Pro</a></div>
+    </div>
+  </div>
+</section>
+
+<!-- Daftar -->
+<section id="daftar" class="max-w-2xl mx-auto px-4 md:px-6 py-8 md:py-12">
+  <div class="bg-white border rounded-3xl p-6 md:p-8 shadow-xl dark:bg-slate-800 dark:border-slate-700">
+    <h2 class="text-2xl font-bold text-center">Daftar Waiting List — Gratis 14 Hari</h2>
+    <p class="text-center text-slate-500 text-sm mt-1">Isi form, kami kirim akses beta via WA dalam 24 jam</p>
+    <form onsubmit="handleSubmit(event)" class="space-y-3 mt-6">
+      <input id="fName" required placeholder="Nama" class="w-full px-4 py-3 border rounded-full">
+      <input id="fWa" required placeholder="No WA (628...)" class="w-full px-4 py-3 border rounded-full">
+      <input id="fToko" required placeholder="Nama Toko / Usaha" class="w-full px-4 py-3 border rounded-full">
+      <select id="fChat" class="w-full px-4 py-3 border rounded-full bg-white"><option>Chat per hari: 20-50</option><option>50-100</option><option>100+</option></select>
+      <button type="submit" class="w-full bg-green-500 hover:bg-green-600 text-white py-3 rounded-full font-bold">Daftar Sekarang — Gratis</button>
+    </form>
+    <p id="formMsg" class="text-center text-sm mt-3 hidden"></p>
+    <p class="text-center text-xs text-slate-400 mt-3">Dengan mendaftar, kamu setuju dihubungi via WA untuk onboarding.</p>
+  </div>
+</section>
+
+<footer class="text-center text-xs text-slate-400 py-8 border-t pb-20 md:pb-8 dark:border-slate-800">© 2026 WACRM — Built for UMKM Indonesia. Bukan afiliasi WhatsApp/Meta.</footer>
+<!-- Mobile Sticky CTA -->
+<div class="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur border-t dark:border-slate-800 p-3 flex gap-2 z-20">
+  <a href="#daftar" class="flex-1 bg-green-500 hover:bg-green-600 text-white text-center py-3 rounded-full font-bold text-sm">Coba Gratis 14 Hari</a>
+  <a href="http://localhost:8000/docs" target="_blank" class="px-4 py-3 border rounded-full dark:text-white dark:border-slate-700 bg-white dark:bg-slate-800"><i class="fa-solid fa-play"></i></a>
+</div>
+
+<!-- PWA Install Banner Landing -->
+<div id="pwaLandingBanner" class="hidden fixed bottom-20 md:bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-80 bg-slate-900 text-white rounded-2xl p-4 shadow-2xl z-30 border border-slate-700">
+  <div class="flex gap-3">
+    <img src="icons/icon-192.png" class="w-10 h-10 rounded-xl bg-white p-1">
+    <div class="flex-1">
+      <p class="font-bold text-sm">Install WACRM</p>
+      <p class="text-xs text-slate-400">Akses cepat dari Home Screen</p>
+    </div>
+    <button onclick="dismissLandingPWA()" class="text-slate-400"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div class="flex gap-2 mt-3">
+    <button onclick="installLandingPWA()" class="flex-1 bg-green-500 text-white py-2 rounded-full text-sm font-semibold">Install</button>
+    <button onclick="dismissLandingPWA()" class="px-4 py-2 bg-white/10 rounded-full text-sm">Nanti</button>
+  </div>
+</div>
+
+<script>
+let deferredLandingPrompt=null;
+window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); deferredLandingPrompt=e; if(!localStorage.getItem('pwa-landing-dismissed')) setTimeout(()=>document.getElementById('pwaLandingBanner')?.classList.remove('hidden'),3000); });
+function installLandingPWA(){ if(!deferredLandingPrompt) return; deferredLandingPrompt.prompt(); deferredLandingPrompt.userChoice.then(c=>{ if(c.outcome==='accepted') dismissLandingPWA(); }); deferredLandingPrompt=null; }
+function dismissLandingPWA(){ document.getElementById('pwaLandingBanner')?.classList.add('hidden'); localStorage.setItem('pwa-landing-dismissed','1'); }
+if('serviceWorker' in navigator){ window.addEventListener('load', ()=> navigator.serviceWorker.register('sw.js').catch(()=>{})); }
+// iOS
+const _isIOS = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
+const _isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+if(_isIOS && !_isStandalone && !localStorage.getItem('pwa-landing-dismissed')){
+  setTimeout(()=>{ const b=document.getElementById('pwaLandingBanner'); if(b){ b.querySelector('p.font-bold').textContent='Install di iPhone'; b.querySelector('p.text-xs').textContent='Share → Add to Home Screen'; const btn=b.querySelector('button.bg-green-500'); if(btn){ btn.textContent='OK'; btn.setAttribute('onclick','dismissLandingPWA()'); } b.classList.remove('hidden'); } },4000);
+}
+
+function handleSubmit(e){
+  e.preventDefault();
+  const data = {
+    name: document.getElementById('fName').value,
+    wa: document.getElementById('fWa').value,
+    toko: document.getElementById('fToko').value,
+    chat: document.getElementById('fChat').value
+  };
+  // Simpan ke localStorage + kirim ke API jika ada
+  const list = JSON.parse(localStorage.getItem('wacrm_leads')||'[]');
+  list.push({...data, at: new Date().toISOString()});
+  localStorage.setItem('wacrm_leads', JSON.stringify(list));
+  
+  // Coba kirim ke backend sebagai kontak baru (opsional)
+  fetch('http://localhost:8000/api/contacts', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({phone: data.wa, name: `${data.name} - ${data.toko}`, status: 'baru', notes: `Lead landing: ${data.chat} chat/hari`})
+  }).catch(()=>{});
+
+  const msg = document.getElementById('formMsg');
+  msg.textContent = `✅ Terima kasih ${data.name}! Kami akan hubungi via WA ke ${data.wa} dalam 24 jam.`;
+  msg.className = 'text-center text-sm mt-3 text-green-600 bg-green-50 border border-green-200 rounded-xl p-3';
+  msg.classList.remove('hidden');
+  e.target.reset();
+}
+</script>
+</body>
+</html>
