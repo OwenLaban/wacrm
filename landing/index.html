@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', ()=>{ updateLandingIcon(document.d
     <a href="#fitur" onclick="toggleLandingMobileMenu()" class="py-3 border-b dark:border-slate-800 dark:text-white">Fitur</a>
     <a href="#harga" onclick="toggleLandingMobileMenu()" class="py-3 border-b dark:border-slate-800 dark:text-white">Harga</a>
     <a href="#daftar" onclick="toggleLandingMobileMenu()" class="py-3 border-b dark:border-slate-800 dark:text-white">Daftar Gratis</a>
-    <a href="http://localhost:8000/docs" class="py-3 dark:text-white">Lihat Demo</a>
+    <a href="/docs" class="py-3 dark:text-white">Lihat Demo</a>
   </div>
 </div>
 
@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', ()=>{ updateLandingIcon(document.d
     <p class="text-slate-500 mt-4 text-base md:text-lg dark:text-slate-400">Inbox terpusat + follow-up otomatis + broadcast anti-banned. Khusus untuk olshop & UMKM yang kebanjiran chat 50-100/hari.</p>
     <div class="flex flex-col md:flex-row gap-3 mt-6">
       <a href="#daftar" class="bg-green-500 hover:bg-green-600 text-white px-6 py-3.5 rounded-full font-semibold text-center">Coba Gratis 14 Hari <i class="fa-solid fa-arrow-right ml-1"></i></a>
-      <a href="http://localhost:8000/docs" target="_blank" class="border px-6 py-3.5 rounded-full font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 text-center dark:text-white dark:border-slate-700">Lihat Demo</a>
+      <a href="/docs" target="_blank" class="border px-6 py-3.5 rounded-full font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 text-center dark:text-white dark:border-slate-700">Lihat Demo</a>
     </div>
     <div class="flex items-center gap-4 mt-6 text-sm text-slate-500">
       <span><i class="fa-solid fa-check text-green-500"></i> Tanpa kartu kredit</span>
@@ -166,7 +166,7 @@ document.addEventListener('DOMContentLoaded', ()=>{ updateLandingIcon(document.d
 <!-- Mobile Sticky CTA -->
 <div class="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur border-t dark:border-slate-800 p-3 flex gap-2 z-20">
   <a href="#daftar" class="flex-1 bg-green-500 hover:bg-green-600 text-white text-center py-3 rounded-full font-bold text-sm">Coba Gratis 14 Hari</a>
-  <a href="http://localhost:8000/docs" target="_blank" class="px-4 py-3 border rounded-full dark:text-white dark:border-slate-700 bg-white dark:bg-slate-800"><i class="fa-solid fa-play"></i></a>
+  <a href="/docs" target="_blank" class="px-4 py-3 border rounded-full dark:text-white dark:border-slate-700 bg-white dark:bg-slate-800"><i class="fa-solid fa-play"></i></a>
 </div>
 
 <!-- PWA Install Banner Landing -->
@@ -212,7 +212,7 @@ function handleSubmit(e){
   localStorage.setItem('wacrm_leads', JSON.stringify(list));
   
   // Coba kirim ke backend sebagai kontak baru (opsional)
-  fetch('http://localhost:8000/api/contacts', {
+  fetch('/api/contacts', {
     method:'POST', headers:{'Content-Type':'application/json'},
     body: JSON.stringify({phone: data.wa, name: `${data.name} - ${data.toko}`, status: 'baru', notes: `Lead landing: ${data.chat} chat/hari`})
   }).catch(()=>{});

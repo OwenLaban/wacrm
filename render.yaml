@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: wacrm
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: wacrm-db
+          property: connectionString
+      - key: WA_GATEWAY_PROVIDER
+        sync: false   # isi manual: mock | fonnte | wablas
+      - key: FONNTE_TOKEN
+        sync: false
+      - key: WABLAS_TOKEN
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
+
+databases:
+  - name: wacrm-db
+    databaseName: wacrm
+    user: wacrm
+    plan: free

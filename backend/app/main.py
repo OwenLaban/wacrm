@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
+import os
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from app.database import engine, Base, SessionLocal
 from app.models import Contact, Message, FollowUpTemplate, Broadcast
@@ -85,18 +87,30 @@ app.include_router(followup.router)
 app.include_router(broadcast.router)
 app.include_router(stats.router)
 
-@app.get("/")
-def root():
-    return {
-        "name": "WACRM API",
-        "version": "1.0.0",
-        "docs": "/docs",
-        "health": "/health"
-    }
-
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+# Serve frontend & landing (hanya jika foldernya ada)
+# Lokal: folder static ada di repo root; di Docker: sejajar dengan app/
+_BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+_REPO_DIR = os.path.dirname(_BASE_DIR)
+
+def _find_static_dir(name):
+    for base in (_BASE_DIR, _REPO_DIR):
+        d = os.path.join(base, name)
+        if os.path.isdir(d):
+            return d
+    return None
+
+FRONTEND_DIR = _find_static_dir("frontend")
+LANDING_DIR = _find_static_dir("landing")
+
+if FRONTEND_DIR:
+    app.mount("/dashboard", StaticFiles(directory=FRONTEND_DIR, html=True), name="dashboard")
+if LANDING_DIR:
+    # Mount paling akhir supaya route /api & /docs tetap prioritas
+    app.mount("/", StaticFiles(directory=LANDING_DIR, html=True), name="landing")
 
 @app.get("/api/seed-demo")
 def seed_demo():

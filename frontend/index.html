@@ -321,10 +321,9 @@ function toggleTheme(){
 // init theme before render (prevent flash)
 (function(){ const saved=localStorage.getItem('wacrm-theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); applyTheme(saved); })();
 
-const API = 'http://localhost:8000';
-// Fix: file:// juga harus ke localhost, jangan kosong
+const API = location.protocol === 'file:' ? 'http://localhost:8000' : window.location.origin;
 // Auto-detect mode dari backend
-fetch('http://localhost:8000/health').then(()=> {
+fetch(API + '/health').then(()=> {
   document.getElementById('gatewayMode').textContent = 'fonnte (connected)';
   document.getElementById('gatewayMode').className = 'text-sm font-mono text-green-400';
 }).catch(()=> {
